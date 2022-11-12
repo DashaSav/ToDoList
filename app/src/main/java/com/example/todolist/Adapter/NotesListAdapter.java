@@ -1,34 +1,95 @@
 package com.example.todolist.Adapter;
 
+import android.content.Context;
 import android.media.Image;
+import android.os.Build;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.todolist.NotesClickListener;
 import com.example.todolist.R;
+import com.example.todolist.models.Note;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class NotesListAdapter extends RecyclerView.Adapter<NotesViewHolder>{
 
+    Context context ;
+    List<Note> list;
+    NotesClickListener listener;
+
+    public NotesListAdapter(Context context, List<Note> list, NotesClickListener listener) {
+        this.context = context;
+        this.list = list;
+        this.listener = listener;
+    }
 
     @NonNull
     @Override
     public NotesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return null;
+        return new NotesViewHolder(LayoutInflater.from(context).inflate(R.layout.notes_list, parent, false));
+
     }
 
     @Override
     public void onBindViewHolder(@NonNull NotesViewHolder holder, int position) {
+        holder.textView_title.setText(list.get(position).getTitle());
+        holder.textView_title.setSelected(true);
 
+        holder.textView_notes.setText(list.get(position).getNotes());
+
+        holder.textView_date.setText(list.get(position).getDate());
+        holder.textView_date.setSelected(true);
+
+        if (list.get(position).isPinned()){
+            holder.imageView_pin.setImageResource(R.drawable.owl_pin);
+        }else{
+            holder.imageView_pin.setImageResource(0);
+        }
+
+        int color_code = getRandomColor();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            holder.notes_container.setCardBackgroundColor(holder.itemView.getResources().getColor(color_code, null)) ;
+        }
+        holder.notes_container.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onClick(list.get(holder.getAdapterPosition()));
+            }
+        });
+        holder.notes_container.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                listener.onLongClick(list.get(holder.getAdapterPosition()), holder.notes_container);
+                return true;
+            }
+        });
+    }
+
+    private int getRandomColor() {
+        List<Integer> colorCode = new ArrayList<>();
+        colorCode.add(R.color.color1);
+        colorCode.add(R.color.color2);
+        colorCode.add(R.color.color3);
+        colorCode.add(R.color.color4);
+        colorCode.add(R.color.color5);
+
+        Random random = new Random();
+        int random_color = random.nextInt(colorCode.size());
+        return random_color;
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return list.size();
     }
 }
 class NotesViewHolder extends RecyclerView.ViewHolder {
