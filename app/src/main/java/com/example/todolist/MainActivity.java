@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, NoteTakenActivity.class);
                 startActivityForResult(intent, 101);
+
             }
         });
     }
@@ -56,6 +57,15 @@ public class MainActivity extends AppCompatActivity {
             if(resultCode == Activity.RESULT_OK){
                 Note new_note =(Note) data.getSerializableExtra("note");
                 database.mainDao().insert(new_note);
+                note.clear();
+                note.addAll(database.mainDao().getAll());
+                notesListAdapter.notifyDataSetChanged();
+            }
+        }
+        if(requestCode == 102){
+            if(resultCode == Activity.RESULT_OK){
+                Note new_note =(Note) data.getSerializableExtra("note");
+                database.mainDao().update(new_note.getID(), new_note.getTitle(), new_note.getNotes());
                 note.clear();
                 note.addAll(database.mainDao().getAll());
                 notesListAdapter.notifyDataSetChanged();
