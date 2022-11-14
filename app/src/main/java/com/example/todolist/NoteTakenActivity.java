@@ -41,33 +41,30 @@ public class NoteTakenActivity extends AppCompatActivity {
             e.printStackTrace();
 
         }
-        imageView_save.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String title = editText_title.getText().toString();
-                String description = editText_notes.getText().toString();
+        imageView_save.setOnClickListener(v -> {
+            String title = editText_title.getText().toString();
+            String description = editText_notes.getText().toString();
 
-                if(description.isEmpty()){
-                    Toast.makeText(NoteTakenActivity.this, "Please, enter description", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                SimpleDateFormat formatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
-                Date date = new Date();
-                if (!isOldNote) {
-                    note = new Note();
-                }
-
-                note.setTitle(title);
-                note.setNotes(description);
-                note.setDate(formatter.format(date));
-
-                Intent intent = new Intent();
-                intent.putExtra("notes", note);
-                setResult(Activity.RESULT_OK, intent);
-
-                finish();
+            if(description.isEmpty()){
+                Toast.makeText(NoteTakenActivity.this, "Please, enter description", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            SimpleDateFormat formatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
+            Date date = new Date();
+            if (!isOldNote) {
+                note = new Note();
+            }
+
+            note.setTitle(title);
+            note.setNotes(description);
+            note.setDate(formatter.format(date));
+
+            Intent intent = new Intent();
+            intent.putExtra("note", note);
+            setResult(Activity.RESULT_OK, intent);
+
+            finish();
         });
     }
 }

@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener{
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
     RecyclerView recyclerView;
     FloatingActionButton fab_add;
     NotesListAdapter notesListAdapter;
@@ -48,12 +48,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
 
         updateRecycle(note);
-        fab_add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, NoteTakenActivity.class);
-                startActivityForResult(intent, 101);
-            }
+        fab_add.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, NoteTakenActivity.class);
+            startActivityForResult(intent, 101);
         });
 
         searchView_home.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -87,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == 101){
             if(resultCode == Activity.RESULT_OK){
-                Note new_note =(Note) data.getSerializableExtra("note");
+                Note new_note = (Note) data.getSerializableExtra("note");
                 database.mainDao().insert(new_note);
                 note.clear();
                 note.addAll(database.mainDao().getAll());
