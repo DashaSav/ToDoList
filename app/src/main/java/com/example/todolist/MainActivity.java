@@ -11,8 +11,11 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import com.example.todolist.Adapter.NotesListAdapter;
 import com.example.todolist.DataBase.RoomDB;
@@ -23,13 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener{
     RecyclerView recyclerView;
     FloatingActionButton fab_add;
     NotesListAdapter notesListAdapter;
     RoomDB database;
     List<Note> note = new ArrayList<>();
     SearchView searchView_home;
+    Note selectedNote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +124,34 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onLongClick(Note note, CardView cardView) {
+            selectedNote = new Note();
+            selectedNote = note;
+            showPopup(cardView);
 
         }
     };
+
+    private void showPopup(CardView cardView) {
+        PopupMenu popupMenu = new PopupMenu(this, cardView);
+        popupMenu.setOnMenuItemClickListener(this);
+        popupMenu.inflate(R.menu.popup_menu);
+        popupMenu.show();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.pin:
+                if(selectedNote.isPinned()){
+                    database.mainDao().pin(selectedNote.getID(), false);
+                    Toast.makeText(MainActivity.this, "Unpinned", Toast.LENGTH_SHORT).show();
+                }
+
+
+            case R.id.delete:
+        }
+
+
+        return false;
+    }
 }
