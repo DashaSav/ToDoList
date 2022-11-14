@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                filter(newNext);
+                filter(newText);
                 return true;
             }
         });
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         List<Note> filteredList = new ArrayList<>();
         for(Note singleNote: note){
             if(singleNote.getTitle().toLowerCase().contains(newText.toLowerCase())
-                    || singleNote.getNotes().toLowerCase().contains(newText.toLowerCase()){
+                    || singleNote.getNotes().toLowerCase().contains(newText.toLowerCase())){
                 filteredList.add(singleNote);
             }
         }
