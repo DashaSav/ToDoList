@@ -1,4 +1,4 @@
-package com.example.todolist;
+package com.example.todolist.ui.takeNote;
 
 import androidx.cardview.widget.CardView;
 

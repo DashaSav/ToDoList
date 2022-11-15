@@ -1,7 +1,6 @@
-package com.example.todolist.Adapter;
+package com.example.todolist.adapter;
 
 import android.content.Context;
-import android.media.Image;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.todolist.NotesClickListener;
+import com.example.todolist.ui.takeNote.NotesClickListener;
 import com.example.todolist.R;
 import com.example.todolist.models.Note;
 

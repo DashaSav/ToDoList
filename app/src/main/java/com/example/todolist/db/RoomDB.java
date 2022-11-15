@@ -1,4 +1,4 @@
-package com.example.todolist.DataBase;
+package com.example.todolist.db;
 
 import android.content.Context;
 
@@ -8,10 +8,10 @@ import androidx.room.RoomDatabase;
 
 import com.example.todolist.models.Note;
 
-@Database(entities = Note.class, version = 1, exportSchema = false)
+@Database(entities = Note.class, version = 1)
 public abstract class RoomDB extends RoomDatabase {
     private static RoomDB database;
-    private static String DATABASE_NAME = "NoteApp";
+    private final static String DATABASE_NAME = "NoteApp";
 
     public synchronized static RoomDB getInstance(Context context){
         if  (database == null) {
@@ -24,8 +24,4 @@ public abstract class RoomDB extends RoomDatabase {
 
     }
     public abstract mainDAO mainDao();
-
-
-
-
 }

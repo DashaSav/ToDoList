@@ -1,4 +1,4 @@
-package com.example.todolist;
+package com.example.todolist.ui.main;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,19 +12,19 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-import com.example.todolist.Adapter.NotesListAdapter;
-import com.example.todolist.DataBase.RoomDB;
+import com.example.todolist.adapter.NotesListAdapter;
+import com.example.todolist.db.RoomDB;
+import com.example.todolist.ui.takeNote.NoteTakenActivity;
+import com.example.todolist.ui.takeNote.NotesClickListener;
+import com.example.todolist.R;
 import com.example.todolist.models.Note;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
     RecyclerView recyclerView;

@@ -5,18 +5,21 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
+    tools:context=".ui.main.MainActivity"
     android:background="@color/black">
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/searchView_home"
-        android:layout_height="?attr/actionBarSize"
         android:layout_width="match_parent"
-        app:queryHint="Enter text ..."
-        app:iconifiedByDefault="false"
+        android:layout_height="?attr/actionBarSize"
         android:layout_alignParentTop="true"
-        android:background="@color/grey"
-        android:layout_margin="16dp" />
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/teal_200"
+        app:iconifiedByDefault="false"
+        app:queryHint="Enter text ..." />
 
 
     <androidx.recyclerview.widget.RecyclerView
@@ -24,21 +27,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/searchView_home"
-        android:layout_margin="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp">
-    </androidx.recyclerview.widget.RecyclerView>
+        android:layout_marginBottom="8dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add"
-        android:layout_margin="26dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:src="@drawable/ic_plus_icon"
-        />
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginEnd="26dp"
+        android:layout_marginBottom="26dp"
+        android:contentDescription="@string/add_note_btn_descr"
+        android:src="@drawable/ic_plus_icon" />
 
 </RelativeLayout>
 

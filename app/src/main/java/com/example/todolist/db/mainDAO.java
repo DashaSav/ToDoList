@@ -1,4 +1,4 @@
-package com.example.todolist.DataBase;
+package com.example.todolist.db;
 
 import static androidx.room.OnConflictStrategy.REPLACE;
 
@@ -15,8 +15,10 @@ import java.util.List;
 public interface mainDAO {
     @Insert (onConflict = REPLACE)
     void insert (Note notes);
-    @Query("SELECT * FROM notes ORDER BY id DESC")
+
+    @Query("SELECT * FROM notes ORDER BY ID DESC")
     List<Note> getAll();
+
     @Query("UPDATE notes SET title = :title, notes = :notes WHERE ID = :id")
     void update(int id, String title, String notes);
 
