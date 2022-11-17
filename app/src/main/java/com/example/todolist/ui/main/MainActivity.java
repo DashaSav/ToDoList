@@ -1,13 +1,5 @@
 package com.example.todolist.ui.main;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,45 +7,118 @@ import android.view.MenuItem;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
+import com.example.todolist.R;
 import com.example.todolist.adapter.NotesListAdapter;
 import com.example.todolist.db.RoomDB;
-import com.example.todolist.ui.takeNote.NoteTakenActivity;
-import com.example.todolist.ui.takeNote.NotesClickListener;
-import com.example.todolist.R;
 import com.example.todolist.models.Note;
+import com.example.todolist.ui.takeNote.TakeNoteActivity;
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
+import com.firebase.ui.auth.IdpResponse;
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
-    RecyclerView recyclerView;
-    FloatingActionButton fab_add;
-    NotesListAdapter notesListAdapter;
-    RoomDB database;
-    List<Note> note = new ArrayList<>();
-    SearchView searchView_home;
-    Note selectedNote;
+    private RecyclerView recyclerView;
+    private NotesListAdapter notesListAdapter;
+
+    private SearchView searchView;
+    private FloatingActionButton fabAdd;
+
+    private FirebaseUser user;
+    private RoomDB database;
+
+    private List<Note> note = new ArrayList<>();
+    private Note selectedNote;
+
+    private final NotesClickListener notesClickListener = new NotesClickListener() {
+        @Override
+        public void onClick(Note note) {
+            Intent intent = new Intent(MainActivity.this, TakeNoteActivity.class);
+            intent.putExtra("old_note", note);
+            startActivityForResult(intent, 102);
+        }
+
+        @Override
+        public void onLongClick(Note note, CardView cardView) {
+            selectedNote = note;
+            showPopup(cardView);
+        }
+    };
+
+    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
+            new FirebaseAuthUIActivityResultContract(),
+            result -> onSignInResult(result)
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
-        recyclerView = findViewById(R.id.recycler_home);
-        fab_add = findViewById(R.id.fab_add);
-        searchView_home = findViewById(R.id.searchView_home);
-        database = RoomDB.getInstance(this);
+        getViews();
+
+        firebaseAuthSetup();
+
+        database = RoomDB.getInstance(getApplicationContext());
         note = database.mainDao().getAll();
 
-
         updateRecycle(note);
-        fab_add.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, NoteTakenActivity.class);
+        fabAdd.setOnClickListener(v -> {
+            Intent intent = new Intent(this, TakeNoteActivity.class);
             startActivityForResult(intent, 101);
         });
 
-        searchView_home.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        setSearchQuery();
+    }
+
+    private void firebaseAuthSetup() {
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build()
+        );
+
+        // Create and launch sign-in intent
+        Intent signInIntent = AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(providers)
+                .build();
+        signInLauncher.launch(signInIntent);
+    }
+
+    private void onSignInResult(@NonNull FirebaseAuthUIAuthenticationResult result) {
+        IdpResponse response = result.getIdpResponse();
+        if (result.getResultCode() == RESULT_OK) {
+            user = FirebaseAuth.getInstance().getCurrentUser();
+            // ...
+        } else {
+            firebaseAuthSetup();
+            Toast.makeText(this, "Incorrect login, please retry", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void getViews() {
+        recyclerView = findViewById(R.id.recycler_home);
+        fabAdd = findViewById(R.id.fab_add);
+        searchView = findViewById(R.id.searchView_home);
+    }
+
+    private void setSearchQuery() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -65,14 +130,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 return true;
             }
         });
-
-
     }
-    private void filter(String newText){
+
+    private void filter(String newText) {
         List<Note> filteredList = new ArrayList<>();
-        for(Note singleNote: note){
-            if(singleNote.getTitle().toLowerCase().contains(newText.toLowerCase())
-                    || singleNote.getNotes().toLowerCase().contains(newText.toLowerCase())){
+        for (Note singleNote : note) {
+            if (singleNote.getTitle().toLowerCase().contains(newText.toLowerCase())
+                    || singleNote.getNotes().toLowerCase().contains(newText.toLowerCase())) {
                 filteredList.add(singleNote);
             }
         }
@@ -80,27 +144,29 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 101){
-            if(resultCode == Activity.RESULT_OK){
-                Note new_note = (Note) data.getSerializableExtra("note");
-                database.mainDao().insert(new_note);
-                note.clear();
-                note.addAll(database.mainDao().getAll());
-                notesListAdapter.notifyDataSetChanged();
-            }
-        }
-        if(requestCode == 102){
-            if(resultCode == Activity.RESULT_OK){
-                Note new_note =(Note) data.getSerializableExtra("note");
-                database.mainDao().update(new_note.getID(), new_note.getTitle(), new_note.getNotes());
-                note.clear();
-                note.addAll(database.mainDao().getAll());
-                notesListAdapter.notifyDataSetChanged();
-            }
 
+        Note newNote = (Note) data.getSerializableExtra("note");
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == 101) {
+                if (newNote != null) {
+                    database.mainDao().insert(newNote);
+                    note.clear();
+                    note.addAll(database.mainDao().getAll());
+                    notesListAdapter.notifyDataSetChanged();
+                }
+            } else if (requestCode == 102) {
+                if (newNote != null) {
+                    database.mainDao().update(newNote.getID(), newNote.getTitle(), newNote.getNotes());
+                    note.clear();
+                    note.addAll(database.mainDao().getAll());
+                    notesListAdapter.notifyDataSetChanged();
+                }
+            }
         }
+
     }
 
     private void updateRecycle(List<Note> note) {
@@ -110,24 +176,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         recyclerView.setAdapter(notesListAdapter);
     }
 
-    private final NotesClickListener notesClickListener = new NotesClickListener() {
-        @Override
-        public void onClick(Note note) {
-            Intent intent = new Intent(MainActivity.this, NoteTakenActivity.class);
-            intent.putExtra("old_note", note);
-            startActivityForResult(intent, 102);
-
-        }
-
-        @Override
-        public void onLongClick(Note note, CardView cardView) {
-            selectedNote = new Note();
-            selectedNote = note;
-            showPopup(cardView);
-
-        }
-    };
-
     private void showPopup(CardView cardView) {
         PopupMenu popupMenu = new PopupMenu(this, cardView);
         popupMenu.setOnMenuItemClickListener(this);
@@ -136,13 +184,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()){
+    public boolean onMenuItemClick(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
             case R.id.pin:
-                if(selectedNote.isPinned()){
+                if (selectedNote.isPinned()) {
                     database.mainDao().pin(selectedNote.getID(), false);
                     Toast.makeText(MainActivity.this, "Unpinned", Toast.LENGTH_SHORT).show();
-                }else{
+                } else {
                     database.mainDao().pin(selectedNote.getID(), true);
                     Toast.makeText(MainActivity.this, "Pinned", Toast.LENGTH_SHORT).show();
                 }

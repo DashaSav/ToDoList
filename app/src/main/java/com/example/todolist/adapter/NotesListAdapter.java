@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.todolist.ui.takeNote.NotesClickListener;
+import com.example.todolist.ui.main.NotesClickListener;
 import com.example.todolist.R;
 import com.example.todolist.models.Note;
 
@@ -58,18 +58,11 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesViewHolder>{
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             holder.notes_container.setCardBackgroundColor(holder.itemView.getResources().getColor(color_code, null)) ;
         }
-        holder.notes_container.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.onClick(list.get(holder.getAdapterPosition()));
-            }
-        });
-        holder.notes_container.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                listener.onLongClick(list.get(holder.getAdapterPosition()), holder.notes_container);
-                return true;
-            }
+        holder.notes_container.setOnClickListener(v ->
+                listener.onClick(list.get(holder.getAdapterPosition())));
+        holder.notes_container.setOnLongClickListener(v -> {
+            listener.onLongClick(list.get(holder.getAdapterPosition()), holder.notes_container);
+            return true;
         });
     }
 
