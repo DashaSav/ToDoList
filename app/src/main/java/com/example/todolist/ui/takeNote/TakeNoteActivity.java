@@ -15,7 +15,7 @@ import com.example.todolist.models.Note;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class NoteTakenActivity extends AppCompatActivity {
+public class TakeNoteActivity extends AppCompatActivity {
     EditText editText_title, editText_notes;
     ImageView imageView_save;
     Note note;
@@ -45,7 +45,7 @@ public class NoteTakenActivity extends AppCompatActivity {
             String description = editText_notes.getText().toString();
 
             if(description.isEmpty()){
-                Toast.makeText(NoteTakenActivity.this, "Please, enter description", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TakeNoteActivity.this, "Please, enter description", Toast.LENGTH_SHORT).show();
                 return;
             }
 
