@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private FirebaseUser user;
     private RoomDB database;
 
-    private List<Note> note = new ArrayList<>();
+    private final MutableLiveData<List<Note>> listNotes = new MutableLiveData<>(new ArrayList<>());
     private Note selectedNote;
 
     private final NotesClickListener notesClickListener = new NotesClickListener() {
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new FirebaseAuthUIActivityResultContract(),
-            result -> onSignInResult(result)
+            this::onSignInResult
     );
 
     @Override
@@ -75,9 +77,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         firebaseAuthSetup();
 
         database = RoomDB.getInstance(getApplicationContext());
-        note = database.mainDao().getAll();
+        listNotes.setValue(database.mainDao().getAll());
 
-        updateRecycle(note);
+        setupRecycle(listNotes.getValue());
         fabAdd.setOnClickListener(v -> {
             Intent intent = new Intent(this, TakeNoteActivity.class);
             startActivityForResult(intent, 101);
@@ -133,8 +135,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     private void filter(String newText) {
+        if (listNotes.getValue() == null) return;
+
         List<Note> filteredList = new ArrayList<>();
-        for (Note singleNote : note) {
+
+        for (Note singleNote : listNotes.getValue()) {
             if (singleNote.getTitle().toLowerCase().contains(newText.toLowerCase())
                     || singleNote.getNotes().toLowerCase().contains(newText.toLowerCase())) {
                 filteredList.add(singleNote);
@@ -153,26 +158,28 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             if (requestCode == 101) {
                 if (newNote != null) {
                     database.mainDao().insert(newNote);
-                    note.clear();
-                    note.addAll(database.mainDao().getAll());
-                    notesListAdapter.notifyDataSetChanged();
+                    listNotes.setValue(database.mainDao().getAll());
                 }
             } else if (requestCode == 102) {
                 if (newNote != null) {
                     database.mainDao().update(newNote.getID(), newNote.getTitle(), newNote.getNotes());
-                    note.clear();
-                    note.addAll(database.mainDao().getAll());
-                    notesListAdapter.notifyDataSetChanged();
+                    listNotes.setValue(database.mainDao().getAll());
                 }
             }
         }
 
     }
 
-    private void updateRecycle(List<Note> note) {
+    private void setupRecycle(List<Note> note) {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL));
         notesListAdapter = new NotesListAdapter(MainActivity.this, note, notesClickListener);
+
+        Observer<List<Note>> noteObserver = notes -> {
+            notesListAdapter.setList(notes);
+        };
+        listNotes.observe(this, noteObserver);
+
         recyclerView.setAdapter(notesListAdapter);
     }
 
@@ -194,15 +201,14 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     database.mainDao().pin(selectedNote.getID(), true);
                     Toast.makeText(MainActivity.this, "Pinned", Toast.LENGTH_SHORT).show();
                 }
-                note.clear();
-                note.addAll(database.mainDao().getAll());
-                notesListAdapter.notifyDataSetChanged();
+                listNotes.setValue(database.mainDao().getAll());
                 return true;
 
 
             case R.id.delete:
                 database.mainDao().delete(selectedNote);
-                note.remove(selectedNote);
+                if (listNotes.getValue() != null)
+                    listNotes.getValue().remove(selectedNote);
                 Toast.makeText(MainActivity.this, "Note removed", Toast.LENGTH_SHORT).show();
                 return true;
             default:

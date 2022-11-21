@@ -21,9 +21,9 @@ import java.util.Random;
 
 public class NotesListAdapter extends RecyclerView.Adapter<NotesViewHolder>{
 
-    Context context ;
-    List<Note> list;
-    NotesClickListener listener;
+    private final Context context;
+    private List<Note> list;
+    private final NotesClickListener listener;
 
     public NotesListAdapter(Context context, List<Note> list, NotesClickListener listener) {
         this.context = context;
@@ -89,6 +89,10 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesViewHolder>{
         notifyDataSetChanged();
     }
 
+    public void setList(List<Note> list) {
+        this.list = list;
+        notifyDataSetChanged();
+    }
 }
 class NotesViewHolder extends RecyclerView.ViewHolder {
     CardView notes_container;
